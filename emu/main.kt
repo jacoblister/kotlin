@@ -1,13 +1,11 @@
 class IO16x8(
-    val addr: i16,
-    val dataIn: i8
+    val addr: i16 = i16(),
+    val data: i8 = i8()
 ) {
-    val dataOut: i8
-
-//    fun read(readAddr: i16): i8 {
-//        addr(readAddr)
-//        return dataIn()
-//    }
+    fun read(readAddr: i16): i8 {
+        addr(readAddr)
+        return data()
+    }
 }
 
 class APUCore(val trigger: i16) {
@@ -26,6 +24,13 @@ class APU(io: IO16x8) {
     }
 }
 
+fun forever(label: String, guard: () -> Unit, action: () -> Unit) {
+    println(label)
+    guard()
+    action()
+}
+
+
 class PPU (
     io: IO16x8,
     interrupt: Interrupt
@@ -33,38 +38,61 @@ class PPU (
 {
     val float: display
 
-    suspend fun process() {
-        val LY = 0.i16
-        val LYC = 0.i16
+    fun process() {
+        val STAT = 0.i8
+        val LY = 0.i8
+        val LYC = 0.i8
 
         forever("io") {
             when(io.addr()) {
-                0xFF45 -> when(io.dataIn.signaled) {
-                    false -> io.dataOut(LY)
-                    true -> {}
+                0xFF45 -> when {
+                    io.dataIn.ready -> io.dataOut(LY)
+                    default         -> {}
                 }
-                0xFF45 -> when(io.w) {
-                    true  -> LYC(io.dataIn)
-                    false -> io.dataOut(LYC)
+                0xFF45 -> when {
+                    io.dataIn.ready  -> LYC(io.dataIn)
+                    default          -> io.dataOut(LYC)
                 }
             }
         }
 
-        forever("interrupt") {
-            if (LYC() == LY) {
-                interrupt(1)
-            }
+        forever("interrupt",{ LY() == LYC }) {
+            interrupt(1)
+        }
+
+        forever("oam",{ STAT[1 downTo 0 ]() == 2 }) {
+            /* oam */
+        }
+
+        forever("bgTile",{ STAT[1 downTo 0 ]() == 2 && bgIndex = 0 }) {
+            /* bgtile */
+        }
+
+        forever("draw",{ STAT[1 downTo 0 ]() == 3 }) {
+            /* draw */
         }
 
         forever("raster") {
             for (line in 0 .. 143) {
+                /* oam */
                 LY(line)
-                while (0) { /* oam */ }
-                while (0) { /* draw */ }
-                while (0) { /* hblank */ }
+                STAT[1 downTo 0] = 2
+                for (dot in 0 .. 100) {}
+
+                /* draw */
+                for (dot in 0 .. 160) {
+                    STAT[1 downTo 0] = 3
+                }
+
+                /* hblank */
+                STAT[1 downTo 0] = 0
+                for (dot in 260 .. 456) {}
+
             }
+
+            /* vblank */
+            STAT[1 downTo 0] = 1
             for (line in 144 .. 153) {
-                /* vblank */
                 LY(line)
             }
         }
