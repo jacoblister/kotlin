@@ -1,5 +1,11 @@
-fun logBitvec(bitvec: Bitvec) {
-    println(bitvec)
+fun testSignal() {
+    val test_a = i8(2)
+    val test_b = 3.i8
+
+    test_b(123.i8)
+    signalNext()
+
+    println("$test_a + $test_b = ${test_a + test_b}")
 }
 
 fun testBitVecSignal() {
@@ -8,29 +14,16 @@ fun testBitVecSignal() {
 
     println("$test_a + $test_b = ${test_a + test_b}")
 
-    val nibble = test_a[7 downTo 4]
+//    val nibble = test_a[7 downTo 4]
+    val nibble = intbv(9, 4)
     println(nibble)
+    println(nibble.bits)
 
     val byte = intbv(nibble, nibble)
     println(byte)
-    println(byte.signal.bits)
+    println(byte.bits)
 }
 
-fun testValue() {
-    val test_a = I8(2)
-    val test_b = I8(3)
-
-    println("$test_a + $test_b")
-}
-
-fun testSignal() {
-    val test_a = i8(2)
-    val test_b = 3.i8
-
-    test_b(123)
-
-    println("$test_a + $test_b = ${test_a + test_b}")
-}
 
 fun main() {
     testBitVecSignal()
