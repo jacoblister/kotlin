@@ -3,7 +3,7 @@ var pendingTarget: Signal = SignalNone()
 var pendingNext: Signal = SignalNone()
 
 interface Signal {
-    operator fun invoke(next: Signal) {
+    fun next(next: Signal) {
         println("send")
         pendingTarget = this
         pendingNext = next

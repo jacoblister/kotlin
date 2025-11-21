@@ -9,26 +9,32 @@ fun testSignal() {
 }
 
 fun testBitVecSignal() {
-    val test_a = intbv(128, 8)
-    val test_b = intbv(3, 8)
+    val test_a = intbv(8, 128 + 16 + 13)
+    val test_b = intbv(8, 3)
 
     println("$test_a + $test_b = ${test_a + test_b}")
 
-//    val nibble = test_a[7 downTo 4]
-    val nibble = intbv(9, 4)
+    val nibble = test_a[7 downTo 4]
     println(nibble)
+    println(nibble.length)
     println(nibble.bits)
+    println(test_a.bits)
 
-    val byte = intbv(nibble, nibble)
-    println(byte)
-    println(byte.bits)
+    nibble(test_a[3 downTo 0])
+    signalNext()
+    println(nibble)
+    println(nibble.length)
+    println(nibble.bits)
+    println(test_a.bits)
+//    val byte = intbv(nibble, nibble)
+//    println(byte)
+//    println(byte.bits)
 }
 
 
 fun main() {
-    testBitVecSignal()
-//    testValue()
 //    testSignal()
+    testBitVecSignal()
 
 //    val bitvecInt = Bitvec_Int(0xFFF, 13)
 //    val bitvecI8 = I8(0xFF)

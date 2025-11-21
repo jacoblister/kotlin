@@ -4,14 +4,10 @@ val threadBitvecMatch = ThreadLocal<BitvecMatch>()
 typealias Bit = Boolean
 
 interface Bitvec {
-    val rawbits: ULong
     val length: Int
+    val rawbits: ULong
 
     operator fun get(index: Int): Bit = if (((rawbits shr index) and 1UL) == 1UL) true else false
-    operator fun set(index: Int, value: Int) = {}
-    fun set(index: Int, value: Bit) = {}
-    fun get(range: IntProgression): ULong = rawbits shr range.last // + reverse + mask
-    fun rangeLength(range: IntProgression): Int = range.first - range.last + 1 // + reverse
 
     fun match (pattern: String): Boolean {
         val matched = length == 8
