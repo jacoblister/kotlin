@@ -1,4 +1,4 @@
 wsl -d Ubuntu-24.04
-kotlinc builtin/bitvec.kt builtin/signal.kt builtin/test.kt -include-runtime -d build.jar && java -jar build.jar
-kotlinc builtin/bitvec.kt emu/main.kt -include-runtime -d build.jar && java -jar build.jar
+kotlinc builtin/*.kt test/number.kt -include-runtime -d build.jar && java -jar build.jar
 kotlinc thread/thread.kt -include-runtime -d build.jar && java -jar build.jar
+
