@@ -1,10 +1,6 @@
 interface BitvecSignal : Bitvec, Signal {
     operator fun get(range: IntProgression): BitvecSlice = BitvecSlice(this, range.first, range.last)
     fun frombits(length: Int, bits: ULong): BitvecSignal
-    fun replacebits(from: Int, to: Int, bits: ULong): ULong {
-        val mask = ((1UL shl (from - to + 1)) - 1UL)
-        return (rawbits and mask) or (bits shl to)
-    }
 }
 
 class BitvecSlice(val signal: BitvecSignal, val from: Int, val to: Int) : BitvecSignal {
@@ -12,8 +8,13 @@ class BitvecSlice(val signal: BitvecSignal, val from: Int, val to: Int) : Bitvec
     override val rawbits: ULong get() = (signal.rawbits shr to) and ((1UL shl (from - to + 1)) - 1UL)
     override fun frombits(length: Int, bits: ULong): BitvecSignal = this
 
+    fun replacebits(bits: ULong, from: Int, to: Int, nextbits: ULong): ULong {
+        val mask = ((1UL shl (from - to + 1)) - 1UL)
+        return (bits and mask) or (nextbits shl to)
+    }
+
     operator fun invoke(next: BitvecSignal) {
-        this.signal.next(this.signal.frombits(this.signal.length, this.signal.replacebits(from, to, next.rawbits)))
+        (this.signal as Signal)(this.signal.frombits(this.signal.length, replacebits(this.signal.rawbits, from, to, next.rawbits)))
 //        this.next(next)
     }
 }
@@ -40,7 +41,7 @@ class intbv : BitvecSignal {
         value = initValue
     }
 
-    operator fun invoke(next: intbv) = this.next(next)
+    operator fun invoke(next: intbv) = (this as Signal)(next)
     operator fun plus(other: intbv): intbv = intbv(this.length, this.value + other.value)
 
     override fun toString() = "$value:$length"
@@ -51,7 +52,7 @@ class i8(val value: Int) : BitvecSignal {
     override val rawbits: ULong get() = value.toULong()
     override fun frombits(length: Int, bits: ULong): BitvecSignal = i8(bits.toInt())
 
-    operator fun invoke(next: i8) = this.next(next)
+    operator fun invoke(next: i8) = (this as Signal)(next)
     operator fun plus(other: i8): i8 = i8(this.value + other.value)
 
     override fun toString() = "$value"
