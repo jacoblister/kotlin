@@ -23,6 +23,6 @@ fun main() {
     val nibble = byte[3 downTo 0]
 
     val inst = when(byte) {
-        in byte.match("00xxyy.1") -> "ADD $byte.x $byte.y"
+        in "00xxyy.1" -> "ADD $byte.x $byte.y"
     }
 }

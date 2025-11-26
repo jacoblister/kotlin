@@ -3,11 +3,12 @@ var pendingTarget: Signal = SignalNone()
 var pendingNext: Signal = SignalNone()
 
 interface Signal {
-    operator fun invoke(next: Signal) {
+     fun next(next: Signal) {
         println("send")
         pendingTarget = this
         pendingNext = next
     }
+    operator fun invoke(next: Signal) = this.next(next) 
 //    override fun toString() = "<${signal!!::class.simpleName}>(signal=$this, next=$pending)"
 }
 
