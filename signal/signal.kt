@@ -55,26 +55,25 @@ class Envelope(
 ) {
     val output: float = float()
 
-    suspend fun process() {
-        while (latch { trigger } < 1) {
+    init {
+        while (process { trigger } < 1) {
             output(0.f)
         }
-        for (level in 0.0f .. 1.0f step process { attack() * 44100 / 1000 }) {
+        for (level in 0..1 step { attack() * 44100 / 1000 }) {
             output(level)
         }
-        for (level in 1.0f downTo sustain step process { decay() * 44100 / 1000 }) {
+        for (level in 1..sustain step { decay() * 44100 / 1000 }) {
             output(level)
         }
-        while(latch { trigger } > 0) {
-            output(level)
+        while(process { trigger } > 0) {
+            output(sustain)
         }
-        for (level in sustain downTo 0 step process { release() * 44100 / 1000 }) {
+        for (level in sustain..0 step { release() * 44100 / 1000 }) {
             output(level)
         }
     }
 
     fun render() {
-        Parameter(default = false)
         Panel {
             Knob(src = attack, label="Attack")
             Knob(src = decay, label="Decay")
@@ -88,12 +87,11 @@ class Oscillator(
     val freq: float = parameter(440, min = 20, max = 200000)
 ) {
     val output = float()
-    operator fun invoke() {
+    init {
         val phase: float = 0.f
-        val inc: float = latch { phase / 1000 }
 
         forever {
-            phase = phase + inc
+            phase = phase + process { freq() / 1000 }
             output(phase)
         }
     }
@@ -104,7 +102,9 @@ class Gain(
     val right: float
 ) {
     val output = float()
-    operator fun invoke() {}
+    init {
+        output = left + right
+    }
 }
 
 class Synth() {
