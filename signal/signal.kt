@@ -56,20 +56,22 @@ class Envelope(
     val output: float = float()
 
     init {
-        while (process { trigger } < 1) {
-            output(0.f)
-        }
-        for (level in 0..1 step { attack() * 44100 / 1000 }) {
-            output(level)
-        }
-        for (level in 1..sustain step { decay() * 44100 / 1000 }) {
-            output(level)
-        }
-        while(process { trigger } > 0) {
-            output(sustain)
-        }
-        for (level in sustain..0 step { release() * 44100 / 1000 }) {
-            output(level)
+        forever {
+            while (trigger < 1) {
+                output(0)
+            }
+            for (level in 0..1 step { attack * 44100 / 1000 }) {
+                output(level)
+            }
+            for (level in 1..sustain step { decay * 44100 / 1000 }) {
+                output(level)
+            }
+            while(trigger > 0) {
+                output(sustain)
+            }
+            for (level in sustain..0 step { release * 44100 / 1000 }) {
+                output(level)
+            }
         }
     }
 
@@ -91,7 +93,7 @@ class Oscillator(
         val phase: float = 0.f
 
         forever {
-            phase = phase + process { freq() / 1000 }
+            phase += process { freq() / 1000 } 
             output(phase)
         }
     }

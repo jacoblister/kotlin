@@ -1,34 +1,24 @@
 class SPI() {
     var cs: bit
-    var clk: bit
+    var clk: bit = Clock
     var miso: bit
     var mosi: bit
 
-    suspend fun sendRecieve(srcClk: Boolean, txData: Int, txLen: Int, rxData: Int, rxLen: Int) {
-        while (srcClk() != 0) {}
-        clk(0)
-        cs(0)
+    fun sendRecieve(txData: Int, txLen: Int, rxData: Int, rxLen: Int) {
+        tick {
+            cs(0)
+        }
 
-        for (val i in 0..txLen) {
-            while (srcClk() != 1) {}
-            clk(1)
-
+        for (val i in 0..txLen) tick {
             mosi(txData[i])
-
-            while (srcClk() != 0) {}
-            clk(0)
         }
 
-        for (val i in 0..txLen) {
-            while (srcClk() != 1) {}
-            clk(1)
-
+        for (val i in 0..txLen) tick {
             rxData[i] = miso()
-
-            while (srcClk() != 0) {}
-            clk(0)
         }
 
-        cs(1)
+        tick {
+            cs(1)
+        }
     }
 }
