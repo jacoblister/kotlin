@@ -1,24 +1,34 @@
-class SPI() {
-    var cs: bit
-    var clk: bit = Clock
-    var miso: bit
-    var mosi: bit
+class SPI(
+    @Out val cs: bit,
+    @Out val mosi: bit,
+    @In  val miso: bit
+) {
+    @Out val txData: bit = bit()
+    @In  val txData: bit = bit()
 
-    fun sendRecieve(txData: Int, txLen: Int, rxData: Int, rxLen: Int) {
-        tick {
-            cs(0)
-        }
+    init {
+        forever({txData}) {
+            for (val data in txData) tick {
+                mosi(data)
+            }
 
-        for (val i in 0..txLen) tick {
-            mosi(txData[i])
-        }
-
-        for (val i in 0..txLen) tick {
-            rxData[i] = miso()
-        }
-
-        tick {
-            cs(1)
+            for (val data in rxData) tick {
+                data(mosi)
+            }
         }
     }
+}
+
+fun main() {
+    val spi = SPI(cs = Pin[10], mosi = Pin[11], miso = Pin[12])
+
+    val txMsg = 0x1A.i8
+    val rxMsg = i8()
+
+    spi.cs(0)
+    spi.txData(txMsg.bits)
+    spi.rxData(rxMsg.bits)
+    spi.cs(1)
+
+    spi.txData(i8.array(0x2A, 0x00, 0x01))
 }
